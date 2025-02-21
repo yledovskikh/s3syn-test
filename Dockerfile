@@ -6,10 +6,7 @@ WORKDIR /app
 
 # Копирование go.mod и go.sum для кэширования зависимостей
 COPY go.mod go.sum ./
-RUN echo "===> Adding trusted CA..." && \
-    curl -sL http://ca.s7.ru/GroupS7_RootCA.crt | openssl x509 -inform der -outform pem > /usr/local/share/ca-certificates/group-root.crt && \
-    curl -sL http://ca.s7.ru/SUBCAUSR02.crt | openssl x509 -inform der -outform pem > /usr/local/share/ca-certificates/group-subca-usr02.crt && \
-    update-ca-certificates
+
 # Загрузка и установка зависимостей
 RUN go mod download
 

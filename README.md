@@ -1,6 +1,6 @@
 # S3 File Operations Tool
 
-This tool is designed to perform operations (upload, download, delete) on files stored in an S3-compatible storage. It also includes integrity checks and Prometheus metrics for monitoring the performance and success of these operations.
+This tool is designed to perform operations (upload, download, delete) on files stored in a S3-compatible storage. It also includes integrity checks and Prometheus metrics for monitoring the performance and success of these operations.
 
 ## Features
 
@@ -13,7 +13,7 @@ This tool is designed to perform operations (upload, download, delete) on files 
 
 ## Prerequisites
 
-- Go 1.20 or higher
+- Go 1.24 or higher
 - AWS SDK for Go
 - Prometheus client library for Go
 - S3-compatible storage (e.g., AWS S3, MinIO)
