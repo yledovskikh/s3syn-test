@@ -6,6 +6,7 @@ include:
 
 stages:
   - prepare
+  - secrets
   - build
 
 maintain-vault:
@@ -15,6 +16,9 @@ maintain-vault:
   rules:
     - if: $MAINTAIN_VAULT
 
+env-from-secrets:
+  stage: secrets
+  extends: [.vault_env]
 
 
 variables:
