@@ -12,8 +12,8 @@ maintain-vault:
   stage: prepare
   extends:
     - .vault_get_wrapping_url
-  rules:
-    - if: $MAINTAIN_VAULT
+#  rules:
+#    - if: $MAINTAIN_VAULT
 
 
 
