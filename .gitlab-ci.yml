@@ -44,7 +44,6 @@ build_image:
   before_script:
     - curl -so /usr/share/pki/ca-trust-source/anchors/group-s7.crt http://ca.s7.ru/group-S7-ROOT-CA.crt
     - update-ca-trust
-    - echo  ${USERNAME}
     - buildah login -u ${USERNAME} -p ${PASSWORD} ${REGISTRY}
   script:
     - echo "Determining environment..."
@@ -58,7 +57,7 @@ build_image:
     - ENVIRONMENT="dev"
     - fi
     - buildah pull ${BASE_IMAGE_PATH}/${ENVIRONMENT}:latest|| true
-    - buildah bud --cache-from ${BASE_IMAGE_PATH}/${ENVIRONMENT}:latest
+    - buildah bud --cache-from ${BASE_IMAGE_PATH}/${ENVIRONMENT}
       -t ${BASE_IMAGE_PATH}/${ENVIRONMENT}:latest -t ${BASE_IMAGE_PATH}/${ENVIRONMENT}:${IMAGE_TAG} .
     - buildah push --retry 5 --retry-delay 10s ${BASE_IMAGE_PATH}/${ENVIRONMENT}:${IMAGE_TAG}
     - buildah push --retry 5 --retry-delay 10s ${BASE_IMAGE_PATH}/${ENVIRONMENT}:latest
