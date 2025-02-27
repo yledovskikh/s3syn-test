@@ -42,6 +42,8 @@ build_image:
   image: "$REGISTRY/epaas/common/buildah/stable:v1.31.0-mir"
   extends: [.build_tags]
   before_script:
+    - curl -so /usr/share/pki/ca-trust-source/anchors/group-s7.crt http://ca.s7.ru/group-S7-ROOT-CA.crt
+    - update-ca-trust
     - buildah login -u ${USERNAME} -p ${PASSWORD} ${REGISTRY}
   script:
     - echo "Determining environment..."
