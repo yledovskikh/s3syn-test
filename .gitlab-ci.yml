@@ -44,6 +44,7 @@ build_image:
   before_script:
     - curl -so /usr/share/pki/ca-trust-source/anchors/group-s7.crt http://ca.s7.ru/group-S7-ROOT-CA.crt
     - update-ca-trust
+    - echo  ${USERNAME}
     - buildah login -u ${USERNAME} -p ${PASSWORD} ${REGISTRY}
   script:
     - echo "Determining environment..."
