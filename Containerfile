@@ -1,5 +1,5 @@
 # Фаза 1: Сборка приложения
-FROM docker.io/golang:1.24 AS builder
+FROM docker.io/library/golang:1.24 AS builder
 
 # Установка рабочей директории
 WORKDIR /app
