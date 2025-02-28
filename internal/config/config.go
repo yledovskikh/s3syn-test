@@ -70,12 +70,20 @@ func MustLoad() *Config {
 	}
 
 	cfg.Logger = initLogger(env.LogLevel, env.LogFormat)
+	cfg.Logger.Debug("log format - " + env.LogFormat)
+	cfg.Logger.Debug("FilePatterns - " + env.FilePatterns)
 	cfg.FileNames = cfg.parseCSV(env.FilePatterns)
+	cfg.Logger.Debug("FileSizes - " + env.FileSizes)
 	cfg.FileSizesBytes = cfg.parseIntCSV(env.FileSizes)
+	cfg.Logger.Debug("UploadTimeouts - " + env.UploadTimeouts)
 	cfg.UploadTimeoutSecs = cfg.parseIntCSV(env.UploadTimeouts)
+	cfg.Logger.Debug("DownloadTimeouts - " + env.DownloadTimeouts)
 	cfg.DownloadTimeoutSecs = cfg.parseIntCSV(env.DownloadTimeouts)
+	cfg.Logger.Debug("DeleteTimeouts - " + env.DeleteTimeouts)
 	cfg.DeleteTimeoutSecs = cfg.parseIntCSV(env.DeleteTimeouts)
-
+	cfg.Logger.Debug("s3 endpoint - " + env.S3Endpoint)
+	cfg.Logger.Debug("FILES_DIR - " + env.FilesDir)
+	cfg.Logger.Debug("s3 MinFileSizeForMultipart - " + strconv.Itoa(env.MinFileSizeForMultipart))
 	if len(cfg.FileNames) != len(cfg.FileSizesBytes) || len(cfg.FileNames) != len(cfg.UploadTimeoutSecs) || len(cfg.FileNames) != len(cfg.DownloadTimeoutSecs) || len(cfg.FileNames) != len(cfg.DeleteTimeoutSecs) {
 		cfg.Logger.Error("Mismatch in the number of files, sizes, or timeouts specified")
 		os.Exit(1)
