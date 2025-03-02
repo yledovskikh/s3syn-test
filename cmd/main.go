@@ -4,6 +4,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log/slog"
 	"net/http"
+	_ "net/http/pprof" // Включение поддержки pprof
 	"os"
 	"s3syn-test/internal/health"
 	"s3syn-test/internal/metrics"
@@ -17,6 +18,7 @@ import (
 func main() {
 	cfg := config.MustLoad()
 	metrics.Init()
+
 	// Инициализация HTTP сервера для метрик и health checks
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
@@ -30,6 +32,7 @@ func main() {
 	mux.HandleFunc("/healthz", healthChecker.HandleLiveness)
 	mux.HandleFunc("/ready", healthChecker.HandleReadiness)
 
+	// Запускаем сервер для метрик и health checks
 	go func() {
 		cfg.Logger.Info("Starting metrics and health server on :8080")
 		if err = http.ListenAndServe(":8080", mux); err != nil {
@@ -37,6 +40,16 @@ func main() {
 			os.Exit(2)
 		}
 	}()
+
+	// Запускаем сервер для pprof
+	go func() {
+		cfg.Logger.Info("Starting profiler server on :6060")
+		if err := http.ListenAndServe(":6060", nil); err != nil {
+			cfg.Logger.Error("Failed to start profiler server", slog.Any("error", err))
+			os.Exit(3)
+		}
+	}()
+
 	for {
 		var wg sync.WaitGroup
 		for i, fileName := range cfg.FileNames {

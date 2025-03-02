@@ -20,11 +20,11 @@ type EnvData struct {
 	S3AccessKey             string `env:"S3_ACCESS_KEY"`
 	S3SecretKey             string `env:"S3_SECRET_KEY"`
 	S3Bucket                string `env:"S3_BUCKET"`
-	FilePatterns            string `env:"FILE_PATTERNS"` // Формат: "file1.txt,file2.txt"
-	FileSizes               string `env:"FILE_SIZES"`    // Формат: "1024,2048" (в байтах)
-	UploadTimeouts          string `env:"UPLOAD_TIMEOUTS"`
-	DownloadTimeouts        string `env:"DOWNLOAD_TIMEOUTS"`
-	DeleteTimeouts          string `env:"DELETE_TIMEOUTS"`
+	FilePatterns            string `env:"FILE_PATTERNS" env-default:"file1kb,file1mb"` // Формат: "file1.txt,file2.txt"
+	FileSizes               string `env:"FILE_SIZES" env-default:"1024,1048576"`       // Формат: "1024,2048" (в байтах)
+	UploadTimeouts          string `env:"UPLOAD_TIMEOUTS" env-default:"1,1"`
+	DownloadTimeouts        string `env:"DOWNLOAD_TIMEOUTS" env-default:"1,1"`
+	DeleteTimeouts          string `env:"DELETE_TIMEOUTS" env-default:"1,1"`
 	FilesDir                string `env:"FILES_DIR" env-default:"/tmp"`
 	LogFormat               string `env:"LOG_FORMAT" env-default:"json"`
 	LogLevel                string `env:"LOG_LEVEL" env-default:"info"`
@@ -163,24 +163,47 @@ func (cfg *Config) createTempFiles() {
 }
 
 func (cfg *Config) createTempFileWithSize(fileName string, size int) string {
-	tempFile, err := os.Create(filepath.Join(cfg.FilesDir, fileName))
+	// Формируем путь к временному файлу
+	tempFilePath := filepath.Join(cfg.FilesDir, fileName)
+
+	// Создаем временный файл
+	tempFile, err := os.Create(tempFilePath)
 	if err != nil {
 		cfg.Logger.Error("Failed to create temporary file", slog.Any("error", err))
 		os.Exit(1)
 	}
 	defer func(tempFile *os.File) {
-		err = tempFile.Close()
+		err := tempFile.Close()
 		if err != nil {
+			cfg.Logger.Warn("Failed to close temporary file", slog.String("file", tempFilePath), slog.Any("error", err))
 		}
 	}(tempFile)
 
-	data := make([]byte, size) // Размер в байтах
-	n, err := tempFile.Write(data)
-	if err != nil || n != len(data) {
-		cfg.Logger.Error("Failed to write to temporary file", slog.Any("error", err))
-		os.Exit(1)
+	// Размер блока записи (например, 4 KB)
+	blockSize := 4 * 1024 // 4 KB
+	written := 0
+
+	// Создаем буфер фиксированного размера
+	data := make([]byte, blockSize)
+
+	// Записываем данные блоками
+	for written < size {
+		bytesToWrite := blockSize
+		if remaining := size - written; remaining < blockSize {
+			bytesToWrite = remaining
+		}
+
+		n, err := tempFile.Write(data[:bytesToWrite])
+		if err != nil || n != bytesToWrite {
+			cfg.Logger.Error("Failed to write to temporary file", slog.Any("error", err))
+			os.Exit(1)
+		}
+
+		written += n
 	}
-	return tempFile.Name()
+
+	// Возвращаем путь к созданному файлу
+	return tempFilePath
 }
 
 func (cfg *Config) setupGracefulShutdown() {
