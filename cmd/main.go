@@ -27,7 +27,7 @@ func main() {
 	healthChecker, err := health.NewHealthChecker(cfg)
 	if err != nil {
 		cfg.Logger.Error("Failed to init health checker", slog.Any("error", err))
-		os.Exit(1)
+		os.Exit(11)
 	}
 	mux.HandleFunc("/healthz", healthChecker.HandleLiveness)
 	mux.HandleFunc("/ready", healthChecker.HandleReadiness)
@@ -37,18 +37,20 @@ func main() {
 		cfg.Logger.Info("Starting metrics and health server on :8080")
 		if err = http.ListenAndServe(":8080", mux); err != nil {
 			cfg.Logger.Error("Failed to start metrics and health server", slog.Any("error", err))
-			os.Exit(2)
+			os.Exit(12)
 		}
 	}()
 
-	// Запускаем сервер для pprof
-	go func() {
-		cfg.Logger.Info("Starting profiler server on :6060")
-		if err := http.ListenAndServe(":6060", nil); err != nil {
-			cfg.Logger.Error("Failed to start profiler server", slog.Any("error", err))
-			os.Exit(3)
-		}
-	}()
+	if cfg.Profiler {
+		// Запускаем сервер для pprof
+		go func() {
+			cfg.Logger.Info("Starting profiler server on :6060")
+			if err = http.ListenAndServe(":6060", nil); err != nil {
+				cfg.Logger.Error("Failed to start profiler server", slog.Any("error", err))
+				os.Exit(13)
+			}
+		}()
+	}
 
 	for {
 		var wg sync.WaitGroup
@@ -60,6 +62,6 @@ func main() {
 			}(i, fileName)
 		}
 		wg.Wait()
-		time.Sleep(5 * time.Second)
+		time.Sleep(time.Duration(cfg.TaskInterval) * time.Second)
 	}
 }

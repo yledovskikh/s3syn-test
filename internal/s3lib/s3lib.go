@@ -44,7 +44,7 @@ func ProcessFile(cfg *config.Config, localFilePath, fileName string, fileSize, u
 
 	err = DeleteFileFromS3(cfg, fileName, deleteTimeout)
 	if err != nil {
-		cfg.Logger.Error("Deleted failed", slog.String("file", fileName), slog.Any("error", err))
+		cfg.Logger.Error("Delete failed", slog.String("file", fileName), slog.Any("error", err))
 		return
 	}
 }
