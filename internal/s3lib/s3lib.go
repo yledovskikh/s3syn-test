@@ -264,9 +264,9 @@ func CheckFileIntegrity(cfg *config.Config, originalFilePath, downloadedFilePath
 	// Сравниваем хеши
 	if originalHash != downloadedHash {
 		cfg.Logger.Warn("File integrity check failed", slog.String("file", fileName))
-		metrics.FileIsIncorrect.WithLabelValues(fileName).Set(0)
+		metrics.FileIsCorrected.WithLabelValues(fileName).Set(0)
 	} else {
 		cfg.Logger.Info("File integrity check passed", slog.String("file", fileName))
-		metrics.FileIsIncorrect.WithLabelValues(fileName).Set(1)
+		metrics.FileIsCorrected.WithLabelValues(fileName).Set(1)
 	}
 }

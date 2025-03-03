@@ -15,7 +15,7 @@ var (
 		Name: "s3_delete_duration_seconds",
 		Help: "Time taken to delete file from S3",
 	}, []string{"file"})
-	FileIsIncorrect = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	FileIsCorrected = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "s3_file_is_incorrect",
 		Help: "File integrity check (1 if OK, 0 if corrupted)",
 	}, []string{"file"})
@@ -33,7 +33,7 @@ func Init() {
 	prometheus.MustRegister(UploadDuration)
 	prometheus.MustRegister(DownloadDuration)
 	prometheus.MustRegister(DeleteDuration)
-	prometheus.MustRegister(FileIsIncorrect)
+	prometheus.MustRegister(FileIsCorrected)
 	prometheus.MustRegister(TimeoutMetric)
 	prometheus.MustRegister(IsError)
 }
