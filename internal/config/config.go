@@ -111,9 +111,9 @@ func initLogger(logLevel, logFormat string) *slog.Logger {
 
 	var handler slog.Handler
 	if logFormat == "json" {
-		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level})
+		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level, AddSource: true})
 	} else {
-		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level})
+		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level, AddSource: true})
 	}
 	return slog.New(handler)
 }
