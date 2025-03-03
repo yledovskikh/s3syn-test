@@ -1,15 +1,16 @@
 package s3lib
 
 import (
-	"bytes"
 	"context"
+	"crypto/md5"
 	"crypto/tls"
+	"encoding/hex"
 	"fmt"
+	"hash"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
-	"s3syn-test/internal/utils"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -215,22 +216,53 @@ func DeleteFileFromS3(cfg *config.Config, fileName string, deleteTimeout int) er
 }
 
 func CheckFileIntegrity(cfg *config.Config, originalFilePath, downloadedFilePath, fileName string) {
-	originalData, err := os.ReadFile(originalFilePath)
-	if err != nil {
+	// Создаем хешеры для обоих файлов
+	originalHasher := md5.New()
+	downloadedHasher := md5.New()
+
+	// Функция для вычисления хеша файла блоками
+	calculateHash := func(filePath string, hasher hash.Hash) error {
+		file, err := os.Open(filePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		// Читаем файл блоками
+		buffer := make([]byte, 4*1024) // Размер буфера: 4 KB
+		for {
+			n, err := file.Read(buffer)
+			if err != nil && err != io.EOF {
+				return err
+			}
+			if n == 0 {
+				break
+			}
+			hasher.Write(buffer[:n]) // Обновляем хеш для прочитанного блока
+			if err == io.EOF {
+				break
+			}
+		}
+		return nil
+	}
+
+	// Вычисляем хеши для обоих файлов
+	if err := calculateHash(originalFilePath, originalHasher); err != nil {
 		cfg.Logger.Error("Failed to read original file", slog.String("file", originalFilePath), slog.Any("error", err))
 		return
 	}
 
-	downloadedData, err := os.ReadFile(downloadedFilePath)
-	if err != nil {
+	if err := calculateHash(downloadedFilePath, downloadedHasher); err != nil {
 		cfg.Logger.Error("Failed to read downloaded file", slog.String("file", downloadedFilePath), slog.Any("error", err))
 		return
 	}
 
-	originalHash := utils.CalculateMD5(originalData)
-	downloadedHash := utils.CalculateMD5(downloadedData)
+	// Получаем результаты хеширования
+	originalHash := hex.EncodeToString(originalHasher.Sum(nil))
+	downloadedHash := hex.EncodeToString(downloadedHasher.Sum(nil))
 
-	if !bytes.Equal(originalHash[:], downloadedHash[:]) {
+	// Сравниваем хеши
+	if originalHash != downloadedHash {
 		cfg.Logger.Warn("File integrity check failed", slog.String("file", fileName))
 		metrics.FileIsIncorrect.WithLabelValues(fileName).Set(0)
 	} else {

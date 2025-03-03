@@ -7,5 +7,5 @@ spec:
     - ReadWriteOnce # Тип доступа: только один узел может читать/писать
   resources:
     requests:
-      storage: 10Gi # Запрашиваемый объем хранилища
+      storage: 4Gi # Запрашиваемый объем хранилища
   storageClassName: {{ .Values.pvc.storageClass}} # Класс хранилища (может отличаться в зависимости от кластера)
