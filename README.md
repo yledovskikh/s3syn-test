@@ -79,8 +79,8 @@ podman run -e S3_ENDPOINT=... -e S3_ACCESS_KEY=... -e S3_SECRET_KEY=... -p 8080:
 - s3_operation_is_error: Указывает, произошла ли ошибка во время операции (1 если да, 0 если нет).
 ## Проверка работоспособности
 Приложение предоставляет два endpoint для проверки состояния:
-- /healthz: Проверка активности (liveness probe).
-- /ready: Проверка готовности (readiness probe).
+- /healthz: Проверка работоспособности (liveness probe).
+- /ready: Проверка готовности принимать нагрузку (readiness probe).
 
 Оба endpoint возвращают 200 OK, если все хорошо.
 
