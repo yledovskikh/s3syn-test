@@ -93,8 +93,8 @@ func UploadFileToS3(cfg *config.Config, filePath, fileName string, fileSize, upl
 		})
 	} else {
 		uploader := s3manager.NewUploader(sess, func(u *s3manager.Uploader) {
-			u.PartSize = 20 * 1024 * 1024
-			u.Concurrency = 40
+			u.PartSize = int64(cfg.MinFileSizeForMultipart) * 1024 * 1024
+			u.Concurrency = cfg.ConcurrencyMPU
 		})
 		result, err = uploader.UploadWithContext(ctx, &s3manager.UploadInput{
 			Bucket: aws.String(cfg.S3Bucket),

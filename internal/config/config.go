@@ -28,9 +28,10 @@ type EnvData struct {
 	FilesDir                string `env:"FILES_DIR" env-default:"/tmp"`
 	LogFormat               string `env:"LOG_FORMAT" env-default:"json"`
 	LogLevel                string `env:"LOG_LEVEL" env-default:"info"`
-	TaskInterval            int    `env:"TASK_INTERVAL" env-default:"60"`
 	MinFileSizeForMultipart int    `env:"MIN_FILE_SIZE_FOR_MULTIPART" env-default:"8388608"` // 8 MB
+	TaskInterval            int    `env:"TASK_INTERVAL" env-default:"60"`
 	Profiler                bool   `env:"PROFILER" env-default:"false"`
+	ConcurrencyMPU          int    `env:"CONCURRENCY_MPU" env-default:"3"`
 }
 
 type Config struct {
@@ -50,6 +51,7 @@ type Config struct {
 	S3Bucket                string
 	MinFileSizeForMultipart int
 	TaskInterval            int
+	ConcurrencyMPU          int
 	Profiler                bool
 }
 
@@ -69,6 +71,7 @@ func MustLoad() *Config {
 	cfg.MinFileSizeForMultipart = env.MinFileSizeForMultipart
 	cfg.TaskInterval = env.TaskInterval
 	cfg.Profiler = env.Profiler
+	cfg.ConcurrencyMPU = env.ConcurrencyMPU
 	if env.LogLevel == "debug" {
 		cfg.AwsLogLevel = aws.LogDebug
 	} else {

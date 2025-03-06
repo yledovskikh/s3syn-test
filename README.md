@@ -1,93 +1,102 @@
-# s3syn-test
+# S3 SYNTHETIC TESTS 
 
+Данное приложение предназначено для тестирования функциональности S3-совместимого хранилища. 
+Приложение периодически выполняет - загрузку, скачивание, удаление и проверку целостности файлов 
+Время каждой операции фиксируется и может быть получено в формате Prometheus metrics
 
+# Требования
 
-## Getting started
+ - Go 1.24+
+ - AWS SDK for Go v1
+ - Библиотека Prometheus client_golang для Go
+ - Библиотека cleanenv для парсинга переменных окружения
+ - Хранилище, совместимое с S3
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Конфигурация
+Приложение использует переменные окружения для конфигурации. Ниже приведены доступные параметры:
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Конфигурация приложения
 
-## Add your files
+| Переменная окружения          | Описание                                                       | Значение по умолчанию |
+|-------------------------------|----------------------------------------------------------------|-----------------------|
+| `S3_ENDPOINT`                 | URL эндпоинта S3                                               | `info`                |
+| `S3_REGION`                   | Регион S3                                                      |                       |
+| `S3_ACCESS_KEY`               | Ключ доступа S3                                                |                       |
+| `S3_SECRET_KEY`               | Секретный ключ S3                                              |                       |
+| `S3_BUCKET`                   | Имя бакета S3                                                  |                       |
+| `FILE_PATTERNS`               | Список имен файлов через запятую                               | `file1kb,file1mb`     |
+| `FILE_SIZES`                  | Размеры файлов в байтах через запятую                          | `1024,1048576`        |
+| `UPLOAD_TIMEOUTS`             | Таймауты загрузки в секундах через запятую                     | `1,1`                 |
+| `DOWNLOAD_TIMEOUTS`           | Таймауты скачивания в секундах через запятую                   | `1,1`                 |
+| `DELETE_TIMEOUTS`             | Таймауты удаления в секундах через запятую                     | `1,1`                 |
+| `FILES_DIR`                   | Директория для временных файлов                                | `/tmp`                |
+| `LOG_FORMAT`                  | Формат логов (`json` или `text`)                               | `json`                |
+| `LOG_LEVEL`                   | Уровень логирования (`debug`, `info`, `warn`, `error`)         | `info`                |
+| `MIN_FILE_SIZE_FOR_MULTIPART` | Минимальный размер файла для многопоточной загрузки (в байтах) | `8388608` (8 MB)      |
+| `TASK_INTERVAL`               | Интервал между выполнением задач в секундах                    | `60`                  |
+| `PROFILER`                    | Включение профилировщика                                       | `false`               |
+| `CONCURRENCY_MPU`             | Количество параллельных потоков при загрузке multipart upload  | `3`                   |
+## Запуск приложения
+Предварительные требования
+Убедитесь, что необходимые переменные окружения установлены перед запуском приложения.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
+## Сборка и запуск
 ```
-cd existing_repo
-git remote add origin https://gitlab2.s7corp.ru/epaas/staas/infra/v1/s3syn-test.git
-git branch -M main
-git push -uf origin main
+go build -o s3syn-test main.go
+./s3syn-test
 ```
+## С помощью Podman
+```
+podman build -t s3syn-test .
+podman run -e S3_ENDPOINT=... -e S3_ACCESS_KEY=... -e S3_SECRET_KEY=... -p 8080:8080 s3syn-test
+```
+## Метрики
 
-## Integrate with your tools
+Приложение предоставляет метрики на порту 8080 по пути /metrics. Доступны следующие метрики:
 
-- [ ] [Set up project integrations](https://gitlab2.s7corp.ru/epaas/staas/infra/v1/s3syn-test/-/settings/integrations)
+- s3_upload_duration_seconds: Время выполнения операции загрузки файла в S3.
+- s3_download_duration_seconds: Время выполнения операции скачивания файла из S3.
+- s3_delete_duration_seconds: Время выполнения операции удаления файла из S3.
+- s3_file_is_incorrect: Результат проверки целостности файла (1 если корректен, 0 если поврежден).
+- s3_operation_timeout: Указывает, произошел ли таймаут операции (1 если да, 0 если нет).
+- s3_operation_is_error: Указывает, произошла ли ошибка во время операции (1 если да, 0 если нет).
+## Проверка работоспособности
+Приложение предоставляет два endpoint для проверки состояния:
+- /healthz: Проверка активности (liveness probe).
+- /ready: Проверка готовности (readiness probe).
 
-## Collaborate with your team
+Оба endpoint возвращают 200 OK, если приложение здоровое.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
+## Профилирование
+Для включения профилировщика установите переменную окружения PROFILER в значение true. Профилировщик будет доступен на порту 6060.
+Пример подключения к endpoint профайлера
+```
+go tool pprof -http=:8081 http://localhost:6060/debug/pprof/heap
+```
+## Логирование
+Приложение поддерживает как формат json, так и текстовый формат логов. Уровень логирования можно настроить с помощью переменной окружения LOG_LEVEL.
 ***
 
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Пример использования
+### Переменные окружения
+```bash
+export S3_ENDPOINT=http://localhost:9000
+export S3_ACCESS_KEY=minioadmin
+export S3_SECRET_KEY=minioadmin
+export S3_BUCKET=mybucket
+export FILE_PATTERNS=file1kb,file1mb
+export FILE_SIZES=1024,1048576
+export UPLOAD_TIMEOUTS=5,10
+export DOWNLOAD_TIMEOUTS=5,10
+export DELETE_TIMEOUTS=5,10
+export FILES_DIR=/tmp
+export LOG_FORMAT=json
+export LOG_LEVEL=info
+export MIN_FILE_SIZE_FOR_MULTIPART=8388608
+export TASK_INTERVAL=60
+export PROFILER=false
+```
+### Запуск приложения
+```bash
+go run main.go
+```
