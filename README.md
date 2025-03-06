@@ -37,9 +37,26 @@
 | `PROFILER`                    | Включение профилировщика                                       | `false`               |
 | `CONCURRENCY_MPU`             | Количество параллельных потоков при загрузке multipart upload  | `3`                   |
 ## Запуск приложения
-Предварительные требования
+### Предварительные требования
 Убедитесь, что необходимые переменные окружения установлены перед запуском приложения.
-
+### Переменные окружения
+```bash
+export S3_ENDPOINT=http://localhost:9000
+export S3_ACCESS_KEY=minioadmin
+export S3_SECRET_KEY=minioadmin
+export S3_BUCKET=mybucket
+export FILE_PATTERNS=file1kb,file1mb
+export FILE_SIZES=1024,1048576
+export UPLOAD_TIMEOUTS=5,10
+export DOWNLOAD_TIMEOUTS=5,10
+export DELETE_TIMEOUTS=5,10
+export FILES_DIR=/tmp
+export LOG_FORMAT=json
+export LOG_LEVEL=info
+export MIN_FILE_SIZE_FOR_MULTIPART=8388608
+export TASK_INTERVAL=60
+export PROFILER=false
+```
 ## Сборка и запуск
 ```
 go build -o s3syn-test main.go
@@ -76,27 +93,3 @@ go tool pprof -http=:8081 http://localhost:6060/debug/pprof/heap
 ## Логирование
 Приложение поддерживает как формат json, так и текстовый формат логов. Уровень логирования можно настроить с помощью переменной окружения LOG_LEVEL.
 ***
-
-## Пример использования
-### Переменные окружения
-```bash
-export S3_ENDPOINT=http://localhost:9000
-export S3_ACCESS_KEY=minioadmin
-export S3_SECRET_KEY=minioadmin
-export S3_BUCKET=mybucket
-export FILE_PATTERNS=file1kb,file1mb
-export FILE_SIZES=1024,1048576
-export UPLOAD_TIMEOUTS=5,10
-export DOWNLOAD_TIMEOUTS=5,10
-export DELETE_TIMEOUTS=5,10
-export FILES_DIR=/tmp
-export LOG_FORMAT=json
-export LOG_LEVEL=info
-export MIN_FILE_SIZE_FOR_MULTIPART=8388608
-export TASK_INTERVAL=60
-export PROFILER=false
-```
-### Запуск приложения
-```bash
-go run main.go
-```
