@@ -16,7 +16,7 @@ var (
 		Help: "Time taken to delete file from S3",
 	}, []string{"file"})
 	FileIsCorrected = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "s3_file_is_incorrect",
+		Name: "s3_file_is_correct",
 		Help: "File integrity check (1 if OK, 0 if corrupted)",
 	}, []string{"file"})
 	TimeoutMetric = prometheus.NewGaugeVec(prometheus.GaugeOpts{
