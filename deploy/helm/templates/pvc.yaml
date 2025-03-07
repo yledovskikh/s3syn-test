@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.pvc.name }}
+spec:
+  accessModes:
+    - ReadWriteOnce # Тип доступа: только один узел может читать/писать
+  resources:
+    requests:
+      storage: 4Gi # Запрашиваемый объем хранилища
+  storageClassName: {{ .Values.pvc.storageClass}} # Класс хранилища (может отличаться в зависимости от кластера)
