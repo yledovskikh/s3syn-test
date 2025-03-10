@@ -15,7 +15,7 @@ import (
 )
 
 type EnvData struct {
-	S3Endpoint              string `env:"S3_ENDPOINT" env-default:"info"`
+	S3Endpoint              string `env:"S3_ENDPOINT"`
 	S3Region                string `env:"S3_REGION"`
 	S3AccessKey             string `env:"S3_ACCESS_KEY"`
 	S3SecretKey             string `env:"S3_SECRET_KEY"`
