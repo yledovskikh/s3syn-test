@@ -108,3 +108,5 @@ go tool pprof -http=:8081 http://localhost:6060/debug/pprof/heap
 ```
 ## Логирование
 Приложение поддерживает как формат json, так и текстовый формат логов. Уровень логирования можно настроить с помощью переменной окружения LOG_LEVEL.
+
+#### maintenance repository - https://github.com/yledovskikh/s3syn-test
